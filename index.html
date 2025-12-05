@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>大阪極簡旅遊指南</title>
-    <!-- 引入 Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Google Font: Inter (簡潔的無印風字體選擇) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         /* Muji/Minimalist Custom Styles */
@@ -117,7 +114,6 @@
 </head>
 <body>
 
-    <!-- 主標頭 -->
     <header class="sticky top-0 bg-white shadow-sm p-4 z-20">
         <h1 id="app-title" class="text-xl font-bold text-center text-gray-800">
             大阪極簡旅遊指南
@@ -127,12 +123,9 @@
         </p>
     </header>
 
-    <!-- 內容區塊 (動態切換) -->
     <main id="content" class="p-4 page-content max-w-xl mx-auto">
-        <!-- 內容將由 JavaScript 動態插入 -->
-    </main>
+        </main>
 
-    <!-- 底部導航列 (Fixed Footer Navigation) -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-xl z-30">
         <div class="flex justify-around items-center h-16 max-w-xl mx-auto">
             <button class="nav-item flex flex-col items-center p-2 active" data-page="plan">
@@ -140,8 +133,8 @@
                 <span class="text-xs mt-1">行程</span>
             </button>
             <button class="nav-item flex flex-col items-center p-2" data-page="guide">
-                <i class="fas fa-book-reader text-xl"></i>
-                <span class="text-xs mt-1">導覽</span>
+                <i class="fas fa-sun text-xl"></i>
+                <span class="text-xs mt-1">天氣/交通</span>
             </button>
             <button class="nav-item flex flex-col items-center p-2" data-page="wallet">
                 <i class="fas fa-wallet text-xl"></i>
@@ -158,16 +151,15 @@
         </div>
     </nav>
 
-    <!-- 行程編輯 Modal -->
     <div id="edit-item-modal" class="modal">
         <div class="modal-content">
-            <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">編輯行程細項</h3>
+            <h3 id="modal-title" class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">編輯行程細項</h3>
             
-            <input type="hidden" id="modal-day-index">
+            <input type="hidden" id="modal-mode"> <input type="hidden" id="modal-day-index">
             <input type="hidden" id="modal-item-index">
             
             <div class="mb-4">
-                <label for="modal-time" class="block text-sm font-medium text-gray-700 mb-1">時間 (e.g., 10:00)</label>
+                <label for="modal-time" class="block text-sm font-medium text-gray-700 mb-1">時間 (e.g., 10:00 / 全天)</label>
                 <input type="text" id="modal-time" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-var(--color-primary) focus:border-var(--color-primary)">
             </div>
             
@@ -175,14 +167,76 @@
                 <label for="modal-desc" class="block text-sm font-medium text-gray-700 mb-1">內容描述</label>
                 <textarea id="modal-desc" class="w-full p-2 border border-gray-300 rounded-lg h-24 focus:ring-var(--color-primary) focus:border-var(--color-primary) resize-none"></textarea>
             </div>
+            
+            <div class="mb-4">
+                <label for="modal-type" class="block text-sm font-medium text-gray-700 mb-1">項目類型 (影響圖標，e.g., visit, meal, shopping)</label>
+                <input type="text" id="modal-type" placeholder="e.g., visit, meal, activity" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-var(--color-primary) focus:border-var(--color-primary)">
+            </div>
+            
+            <div class="mb-4">
+                <label for="modal-map" class="block text-sm font-medium text-gray-700 mb-1">地圖搜尋關鍵字 (選填)</label>
+                <input type="text" id="modal-map" placeholder="e.g., 大阪城公園" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-var(--color-primary) focus:border-var(--color-primary)">
+            </div>
+            
+            <div class="mb-4 flex items-center">
+                <input type="checkbox" id="modal-highlight" class="h-4 w-4 text-var(--color-primary) border-gray-300 rounded focus:ring-var(--color-primary)">
+                <label for="modal-highlight" class="ml-2 text-sm font-medium text-gray-700">重點項目 (時間將會高亮顯示)</label>
+            </div>
 
-            <div class="flex justify-end space-x-3">
-                <button onclick="closeEditModal()" class="bg-gray-300 text-gray-800 hover:bg-gray-400 rounded-lg py-2 px-4 text-sm font-medium">取消</button>
-                <button onclick="saveEditedItem()" class="muji-btn py-2 px-4 text-sm font-medium">儲存變更</button>
+            <div class="flex justify-between mt-6">
+                <button id="delete-btn" onclick="deleteItem()" class="bg-red-500 text-white hover:bg-red-600 rounded-lg py-2 px-4 text-sm font-medium">
+                    <i class="fas fa-trash-alt mr-1"></i> 刪除
+                </button>
+                <div class="flex space-x-3">
+                    <button onclick="closeEditItemModal()" class="bg-gray-300 text-gray-800 hover:bg-gray-400 rounded-lg py-2 px-4 text-sm font-medium">取消</button>
+                    <button onclick="saveEditedItem()" class="muji-btn py-2 px-4 text-sm font-medium">儲存/新增</button>
+                </div>
             </div>
         </div>
     </div>
-
+    
+    <div id="edit-day-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">編輯每日標題</h3>
+            
+            <input type="hidden" id="day-modal-index">
+            
+            <div class="mb-4">
+                <label for="day-modal-date" class="block text-sm font-medium text-gray-700 mb-1">日期描述 (e.g., 12/15 (一) Day1)</label>
+                <input type="text" id="day-modal-date" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-var(--color-primary) focus:border-var(--color-primary)">
+            </div>
+            
+            <div class="mb-4">
+                <label for="day-modal-title" class="block text-sm font-medium text-gray-700 mb-1">行程標題 (e.g., 抵達與入住心齋橋)</label>
+                <input type="text" id="day-modal-title" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-var(--color-primary) focus:border-var(--color-primary)">
+            </div>
+            
+            <div class="flex justify-end mt-6 space-x-3">
+                <button onclick="closeEditDayModal()" class="bg-gray-300 text-gray-800 hover:bg-gray-400 rounded-lg py-2 px-4 text-sm font-medium">取消</button>
+                <button onclick="saveEditedDay()" class="muji-btn py-2 px-4 text-sm font-medium">儲存變更</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="reset-confirm-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold text-red-600 mb-4 border-b pb-2">⚠️ 確定要清除所有資料嗎？</h3>
+            
+            <p class="text-gray-700 mb-4">
+                您即將清除瀏覽器中**所有**儲存的行程、記帳、清單等資料。
+            </p>
+            <p class="font-bold text-red-600 mb-6">
+                此操作無法復原，請確認您已經備份重要資訊！
+            </p>
+            
+            <div class="flex justify-end mt-6 space-x-3">
+                <button onclick="closeResetConfirmModal()" class="bg-gray-300 text-gray-800 hover:bg-gray-400 rounded-lg py-2 px-4 text-sm font-medium">取消</button>
+                <button onclick="executeReset()" class="muji-btn bg-red-600 hover:bg-red-700 py-2 px-4 text-sm font-medium">
+                    <i class="fas fa-trash-alt mr-1"></i> 確認清除所有數據
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // ====================================================================
@@ -209,8 +263,8 @@
                     title: "抵達與入住心齋橋",
                     items: [
                         { time: "18:30", type: "arrival", desc: "抵達大阪關西機場（第二航廈）", highlight: true, map: "大阪關西國際機場" },
-                        { time: "19:30", type: "transfer", desc: "前往飯店：VIA INN PRIME 心齋橋四橋Hotel", map: "VIA INN PRIME 心齋橋四橋Hotel" },
-                        { time: "交通建議", type: "tip", desc: "1. 南海電鐵：空港線至南海難波站，步行轉御堂筋線至心齋橋站(M19) 2號出口。<br>2. JR Haruka：至JR天王寺站，轉御堂筋線至心齋橋站(M19) 2號出口。" },
+                        { time: "20:00", type: "meal", desc: "晚餐：心齋橋周邊用餐（自行決定）", highlight: true, map: "心齋橋筋商店街" }, 
+                        { time: "21:30", type: "end", desc: "入住休息", map: "VIA INN PRIME 心齋橋四橋Hotel" },
                     ]
                 },
                 {
@@ -218,7 +272,6 @@
                     title: "日本環球影城🇯🇵 (USJ)",
                     items: [
                         { time: "全天", type: "activity", desc: "日本環球影城遊玩（環球影城攻略）", link: "#", map: "日本環球影城" },
-                        { time: "交通", type: "transfer", desc: "心齋橋站(M19) → 梅田站(M16) → 大阪站(O11) → 西九條站(O14) (轉JR櫻島線) → 環球影城站(P16)", highlight: true },
                     ]
                 },
                 {
@@ -227,7 +280,6 @@
                     items: [
                         { time: "07:30", type: "start", desc: "飯店出發（買早餐）", highlight: true, map: "VIA INN PRIME 心齋橋四橋Hotel" },
                         { time: "09:30", type: "visit", desc: "勝尾寺 (停留約2小時)", map: "勝尾寺" },
-                        { time: "交通", type: "transfer", desc: "心齋橋站(M19) → 箕面萱野站(M06) → 6號月台轉乘 29/30號公車直達勝尾寺" },
                         { time: "11:30", type: "shopping", desc: "＃C-pla 梅田茶屋町店 (扭蛋)", map: "＃C-pla 梅田茶屋町店" },
                         { time: "12:00", type: "meal", desc: "中崎町（午餐）：neel nakazakicho 或 Onigiri Gorichan", map: "中崎町" },
                         { time: "13:30", type: "visit", desc: "大阪城公園・天守閣 (先換御座船票)", map: "大阪城公園" },
@@ -244,8 +296,6 @@
                     date: "12/18 (四) Day4",
                     title: "京都清水寺散策",
                     items: [
-                        { time: "上午", type: "transfer", desc: "大阪至京都交通：心齋橋站(M19) → 梅田站(M16) → JR大阪站 → JR京都站" },
-                        { time: "京都交通", type: "tip", desc: "1. 搭Uber至清水坂與五條通口 (約500元台幣)<br>2. 搭206號巴士在清水道站下車<br>3. 轉地下鐵烏丸線至九條站(1號出口)搭202/207號巴士在清水道站下車" },
                         { time: "下午", type: "visit", desc: "清水寺", map: "清水寺" },
                         { time: "下午", type: "activity", desc: "二年坂、三年坂 (璃光和服體驗)", map: "二年坂" },
                         { time: "傍晚", type: "visit", desc: "鴨川散步", map: "鴨川" },
@@ -256,7 +306,6 @@
                     title: "天橋立&伊根舟屋&美山合掌村 (Klook 一日行程)",
                     items: [
                         { time: "集合", type: "meetup", desc: "Klook 一日行程：蟹道樂 道頓堀東店集合", highlight: true, map: "蟹道樂 道頓堀東店" },
-                        { time: "交通", type: "transfer", desc: "四橋站(Y14) → 難波站(Y15) → 轉千日前線至日本橋站(S17) 步行至集合地" },
                         { time: "全天", type: "activity", desc: "天橋立、伊根舟屋、美山合掌村一日遊", map: "天橋立" },
                     ]
                 },
@@ -265,34 +314,99 @@
                     title: "賦歸",
                     items: [
                         { time: "08:00", type: "start", desc: "辦理退房", highlight: true },
-                        { time: "交通", type: "transfer", desc: "飯店步行至心齋橋站(M19) → 難波站(M20) → 南海難波站 → 南海電鐵空港線至關西空港 (NK33)" },
                         { time: "11:05", type: "departure", desc: "回程航班 MM031 起飛", highlight: true, map: "大阪關西關西國際機場" },
                     ]
                 }
             ],
-            // 深度導覽的原始資料
-            guide: [
-                {
-                    title: "日本環球影城 (USJ) 攻略",
-                    icon: "fas fa-hat-wizard",
-                    text: "日本環球影城是大阪最受歡迎的主題樂園之一，以電影為主題，分為多個區域。務必在入園前確認營業時間與快速通關券資訊。\n\n**冷知識:** 瑪利歐園區 (Super Nintendo World) 的進入有時需要抽選整理券，建議一入園就先預約。它的動力手環能讓你與園區的各種裝置互動，積累金幣！"
+            
+            // ====================================================
+            // TRANSPORT GUIDE (保持不變)
+            // ====================================================
+            transportGuide: [
+                { 
+                    title: "關西機場 (KIX) 往返市區", 
+                    icon: "fas fa-plane-departure",
+                    text: "KIX 往返大阪難波/心齋橋地區主要有兩種方式：\n\n**1. 南海電鐵 Rapi:t:** 最快約 34 分鐘直達難波，適合住在難波或心齋橋的旅客。\n**2. JR Haruka 特急列車:** 適合前往天王寺或新大阪，車程約 35-50 分鐘。若使用 ICOCA & Haruka 套票較為優惠。\n\n**Day 1 抵達交通：**\n* 飯店步行至心齋橋站(M19) → 難波站(M20) → 南海難波站 → 南海電鐵空港線至關西空港 (NK33)",
+                    tip: "如果您是搭乘樂桃航空（MM），請記得是在**第二航廈 (T2)**，需要搭接駁車到第一航廈才能搭乘電車。"
                 },
-                {
-                    title: "大阪城・天守閣：豐臣秀吉的歷史印記",
-                    icon: "fas fa-fort-awesome",
-                    text: "大阪城是日本三大名城之一，由豐臣秀吉於 16 世紀末所建，歷經戰火摧殘後重建。現在的天守閣內部已改建為博物館，展示豐臣秀吉相關文物及大阪城的歷史。\n\n**歷史背景:** 大阪城在德川家康發動的大阪夏之陣後被徹底摧毀。現在我們看到的是 1931 年由市民捐款重建的，頂層的金箔裝飾極為華麗，是現代大阪的象徵。"
+                { 
+                    title: "Day 2：日本環球影城 (USJ) 轉乘", 
+                    icon: "fas fa-train",
+                    text: "心齋橋站(M19) → 梅田站(M16) → 大阪站(O11) → 西九條站(O14) (轉JR櫻島線) → 環球影城站(P16)",
+                    tip: "強烈建議購買快速通關，特別是超級任天堂世界。"
                 },
-                {
-                    title: "京都清水寺：懸空的國寶",
-                    icon: "fas fa-leaf",
-                    text: "清水寺以懸空的「清水舞台」而聞名，是京都最著名的古蹟之一。舞台由 139 根高達數十米的巨大櫸木支撐，結構巧妙，且未使用一根釘子。\n\n**必訪:** 舞台下的音羽之瀧，三道泉水分別代表「長壽」、「戀愛」與「學業」，據說飲用其中一道就能願望成真。"
+                 { 
+                    title: "Day 3：勝尾寺轉乘", 
+                    icon: "fas fa-bus",
+                    text: "心齋橋站(M19) → 箕面萱野站(M06) → 6號月台轉乘 29/30號公車直達勝尾寺",
+                    tip: "由於公車班次較少，請務必先確認好回程時間。"
                 },
+                { 
+                    title: "Day 4：大阪至京都交通", 
+                    icon: "fas fa-route",
+                    text: "**大阪至京都：** 心齋橋站(M19) → 梅田站(M16) → JR大阪站 → JR京都站\n\n**京都當地交通：**\n1. 搭 Uber 至清水坂與五條通口 (約500元台幣)\n2. 搭 206 號巴士在清水道站下車\n3. 轉地下鐵烏丸線至九條站(1號出口)搭 202/207 號巴士在清水道站下車",
+                    tip: "京都的公車路線複雜且擁擠，建議搭配地下鐵或計程車/Uber，以節省時間。"
+                },
+                { 
+                    title: "Day 5：天橋立行程集合轉乘", 
+                    icon: "fas fa-street-view",
+                    text: "四橋站(Y14) → 難波站(Y15) → 轉千日前線至日本橋站(S17) 步行至蟹道樂 道頓堀東店集合",
+                    tip: "由於是 Klook 一日行程，請務必準時到達集合地點，以免耽誤行程。"
+                },
+                { 
+                    title: "Day 6：賦歸交通", 
+                    icon: "fas fa-plane",
+                    text: "飯店步行至心齋橋站(M19) → 難波站(M20) → 南海難波站 → 南海電鐵空港線至關西空港 (NK33)",
+                    tip: "南海電鐵 Rapi:t 全車為對號座，可事先在難波站購買或網路預訂，確保有位。"
+                },
+                { 
+                    title: "大阪市內交通：地鐵與 JR", 
+                    icon: "fas fa-subway",
+                    text: "大阪地鐵共有 8 條路線，覆蓋大部分市區景點。主要景點如心齋橋、難波、梅田都在御堂筋線上 (M)。\n\n**建議票券：**\n* **ICOCA 卡 (類似悠遊卡):** 適用於地鐵、JR、私鐵、巴士、儲值即可使用，方便快速。\n* **大阪周遊卡/一日券:** 若當天行程包含多個付費景點且大量搭乘地鐵，可考慮購買。",
+                    tip: "在難波站，JR、南海電鐵、近鐵、地鐵都匯集於此，轉乘路線較複雜，請預留充足時間並注意指標。"
+                },
+            ],
+            
+            // ====================================================
+            // FOOD RECOMMENDATIONS (美食清單)
+            // ====================================================
+            foodRecommendations: [
+                { city: "大阪", area: "中崎町", items: [
+                    "neel nakazakicho (咖啡廳)",
+                    "Onigiri Gorichan (三角飯糰)"
+                ]},
+                { city: "大阪", area: "大阪城", items: [
+                    "R Baker（麵包店）",
+                    "OSA coffee"
+                ]},
+                { city: "大阪", area: "梅田", items: [
+                    "モリタ屋 壽喜燒"
+                ]},
+                { city: "大阪", area: "黑門市場", items: [
+                    "阿婆鰻魚飯"
+                ]},
+                { city: "大阪", area: "難波", items: [
+                    "味乃家 大阪燒"
+                ]},
+                { city: "大阪", area: "心齋橋", items: [
+                    "うなぎの中庄（鰻魚飯）"
+                ]},
+                { city: "大阪", area: "阿倍野", items: [
+                    "鳗鱼的成濑"
+                ]},
+                { city: "京都", area: "通用/祇園/二年坂", items: [
+                    "二年坂附近鰻魚飯",
+                    "祇園 鰻 川藤（鰻魚飯）",
+                    "八坂神社附近鴨肉飯",
+                    "八坂神社附近炸牛排",
+                    "GOKAGO 日本茶専門店"
+                ]}
             ]
         };
 
 
         // ====================================================================
-        // II. LOCALSTORAGE UTILS
+        // II. LOCALSTORAGE UTILS (略)
         // ====================================================================
 
         /**
@@ -331,6 +445,8 @@
         // 初始化/載入持久化狀態 (優先從 LocalStorage 載入)
         let exchangeRate = loadFromLS('exchangeRate', DEFAULT_EXCHANGE_RATE);
         let budgetEntries = loadFromLS('budgetEntries', []);
+        
+        // 核心：新增購物清單分類到預設清單
         let checklistItems = loadFromLS('checklistItems', initialTripInfo.checklist || [
             { id: 1, text: "護照、身份證、電子簽證/入境卡", checked: false, category: '證件' },
             { id: 2, text: "日圓現金、信用卡", checked: false, category: '證件' },
@@ -342,15 +458,31 @@
             { id: 8, text: "足夠衣物、發熱衣 (依天氣調整)", checked: false, category: '衣物' },
             { id: 9, text: "雨傘/雨衣 (備用)", checked: false, category: '雜物' },
             { id: 10, text: "旅遊票券、行程確認單", checked: false, category: '雜物' },
+            // ** 購物清單項目 **
+            { id: 11, text: "日本藥妝清單", checked: false, category: '購物清單' }, 
+            { id: 12, text: "零食伴手禮清單", checked: false, category: '購物清單' }, 
+            { id: 13, text: "電器產品 (吹風機、保溫杯等)", checked: false, category: '購物清單' },
         ]);
-        let memoContent = loadFromLS('memoContent', "在此輸入您的個人備忘錄或連結...");
+
+        // 確保 memoContent 被正確載入或初始化
+        let memoContent = loadFromLS('memoContent', ''); 
 
         // 核心行程資訊 (可編輯)
         let tripInfo = loadFromLS('tripInfo', initialTripInfo);
+        
+        // 確保新加入的 foodRecommendations 和 transportGuide 存在，若沒有則從 initialTripInfo 補上
+        if (!tripInfo.transportGuide) {
+            tripInfo.transportGuide = initialTripInfo.transportGuide;
+            saveToLS('tripInfo', tripInfo);
+        }
+        if (!tripInfo.foodRecommendations) {
+            tripInfo.foodRecommendations = initialTripInfo.foodRecommendations;
+            saveToLS('tripInfo', tripInfo);
+        }
 
 
         // ====================================================================
-        // III. COMMON UTILS
+        // III. COMMON UTILS (略)
         // ====================================================================
 
         function formatCurrency(amount, currencyCode) {
@@ -433,7 +565,7 @@
                     html = renderPlanPage();
                     break;
                 case 'guide':
-                    html = renderGuidePage();
+                    html = renderTransportPage(); 
                     break;
                 case 'wallet':
                     html = renderWalletPage();
@@ -459,7 +591,7 @@
         }
 
         // ====================================================================
-        // PLAN 頁面
+        // PLAN 頁面 (保持不變)
         // ====================================================================
 
         function getIconForType(type) {
@@ -486,6 +618,7 @@
          * @returns {string} HTML 字串
          */
         function getTimelineItemHtml(item, dayIndex, itemIndex) {
+            // 由於 map=... 網址太長，這裡使用一個較短的 Google Maps 搜尋連結
             const mapLink = item.map ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('日本大阪 ' + item.map)}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 font-medium ml-2 inline-flex items-center"><i class="fas fa-map-pin mr-1"></i> 地圖</a>` : '';
             const linkBtn = item.link && item.link !== '#' ? `<a href="${item.link}" target="_blank" class="text-xs text-teal-600 hover:text-teal-800 font-medium ml-2 inline-flex items-center"><i class="fas fa-link mr-1"></i> 連結</a>` : '';
             
@@ -495,13 +628,12 @@
             }
 
             return `
-                <div class="relative pl-6 pb-8 timeline-item">
+                <div class="relative pl-6 pb-8 timeline-item" id="item-${dayIndex}-${itemIndex}">
                     <div class="timeline-dot"></div>
                     <div class="muji-card p-4 ml-2">
                         <div class="flex justify-between items-start">
                             <p class="text-sm font-semibold text-gray-700 mb-1">${timeDisplay}</p>
-                            <!-- 編輯按鈕 -->
-                            <button onclick="openEditModal(${dayIndex}, ${itemIndex})" class="text-gray-400 hover:text-var(--color-primary) p-1 -mt-1 -mr-1">
+                            <button onclick="openEditItemModal(${dayIndex}, ${itemIndex})" class="text-gray-400 hover:text-var(--color-primary) p-1 -mt-1 -mr-1">
                                 <i class="fas fa-edit text-sm"></i>
                             </button>
                         </div>
@@ -511,7 +643,7 @@
                             <p class="text-base text-gray-800 leading-relaxed">${item.desc}</p>
                         </div>
                         <div class="flex flex-wrap mt-2 -ml-2">
-                           ${mapLink} ${linkBtn}
+                            ${mapLink} ${linkBtn}
                         </div>
                     </div>
                 </div>
@@ -534,11 +666,22 @@
             `).join('');
 
             let itineraryHtml = tripInfo.days.map((day, dayIndex) => `
-                <div class="muji-card p-5 mb-6">
-                    <h3 class="text-xl font-bold text-gray-800 border-b pb-2 mb-4 border-gray-100">${day.date} / ${day.title}</h3>
+                <div class="muji-card p-5 mb-6" id="day-${dayIndex}">
+                    <div class="flex justify-between items-center border-b pb-2 mb-4 border-gray-100">
+                        <h3 class="text-xl font-bold text-gray-800">
+                            ${day.date} / ${day.title}
+                        </h3>
+                        <button onclick="openEditDayModal(${dayIndex})" class="text-gray-400 hover:text-var(--color-primary) p-1">
+                            <i class="fas fa-pencil-alt text-sm"></i> 編輯
+                        </button>
+                    </div>
                     <div class="relative pl-4">
                         ${day.items.map((item, itemIndex) => getTimelineItemHtml(item, dayIndex, itemIndex)).join('')}
                     </div>
+                    <button onclick="openAddItemModal(${dayIndex})" 
+                        class="muji-btn mt-4 w-full py-2 bg-var(--color-accent)/20 hover:bg-var(--color-primary) text-var(--color-primary) hover:text-white border border-var(--color-accent) text-sm font-semibold transition-colors">
+                        <i class="fas fa-plus mr-1"></i> 新增行程項目
+                    </button>
                 </div>
             `).join('');
 
@@ -546,7 +689,6 @@
             return `
                 <h2 class="text-2xl font-bold text-gray-800 mb-6">🗓️ 行程表 (PLAN)</h2>
                 
-                <!-- 基本資訊卡 -->
                 <div class="muji-card p-4 mb-6">
                     <h3 class="text-lg font-semibold text-gray-700 mb-2 border-b border-gray-100 pb-1">核心資訊</h3>
                     <p class="text-base text-gray-700 mb-2">
@@ -559,87 +701,256 @@
                     </div>
                 </div>
 
-                <!-- 每日行程 -->
                 <h3 class="text-xl font-bold text-gray-800 mb-4 mt-6">詳細每日規劃</h3>
                 ${itineraryHtml}
             `;
         }
 
         // ====================================================================
-        // 行程編輯 Modal 邏輯
+        // 行程編輯/新增 Modal 邏輯 (Item CRUD - 保持不變)
         // ====================================================================
 
-        window.openEditModal = function(dayIndex, itemIndex) {
+        /**
+         * 開啟行程細項編輯 Modal
+         * @param {number} dayIndex
+         * @param {number} itemIndex
+         */
+        window.openEditItemModal = function(dayIndex, itemIndex) {
             const item = tripInfo.days[dayIndex].items[itemIndex];
             
+            // 設定 Modal 模式和標題
+            document.getElementById('modal-mode').value = 'edit';
+            document.getElementById('modal-title').textContent = '編輯行程細項';
+            
+            // 顯示刪除按鈕
+            document.getElementById('delete-btn').style.display = 'block';
+
+            // 載入資料
             document.getElementById('modal-day-index').value = dayIndex;
             document.getElementById('modal-item-index').value = itemIndex;
-            document.getElementById('modal-time').value = item.time;
-            document.getElementById('modal-desc').value = item.desc.replace(/<br>/g, '\n'); // 替換 <br> 為換行
+            document.getElementById('modal-time').value = item.time || '';
+            document.getElementById('modal-desc').value = item.desc.replace(/<br>/g, '\n') || ''; // 替換 <br> 為換行
+            document.getElementById('modal-type').value = item.type || '';
+            document.getElementById('modal-map').value = item.map || '';
+            document.getElementById('modal-highlight').checked = item.highlight || false;
             
             document.getElementById('edit-item-modal').style.display = 'block';
         }
 
-        window.closeEditModal = function() {
+        /**
+         * 開啟新增行程細項 Modal
+         * @param {number} dayIndex
+         */
+        window.openAddItemModal = function(dayIndex) {
+            // 設定 Modal 模式和標題
+            document.getElementById('modal-mode').value = 'add';
+            document.getElementById('modal-title').textContent = `為 Day ${dayIndex + 1} 新增項目`;
+            
+            // 隱藏刪除按鈕
+            document.getElementById('delete-btn').style.display = 'none';
+
+            // 清空並設定 Day Index
+            document.getElementById('modal-day-index').value = dayIndex;
+            document.getElementById('modal-item-index').value = -1; // -1 表示新增
+            document.getElementById('modal-time').value = '';
+            document.getElementById('modal-desc').value = ''; 
+            document.getElementById('modal-type').value = 'visit'; // 預設類型
+            document.getElementById('modal-map').value = '';
+            document.getElementById('modal-highlight').checked = false;
+            
+            document.getElementById('edit-item-modal').style.display = 'block';
+        }
+
+        window.closeEditItemModal = function() {
             document.getElementById('edit-item-modal').style.display = 'none';
         }
 
         window.saveEditedItem = function() {
             const dayIndex = parseInt(document.getElementById('modal-day-index').value);
             const itemIndex = parseInt(document.getElementById('modal-item-index').value);
+            const mode = document.getElementById('modal-mode').value;
+            
             const newTime = document.getElementById('modal-time').value.trim();
             const newDesc = document.getElementById('modal-desc').value.trim().replace(/\n/g, '<br>'); // 將換行轉回 <br>
+            const newType = document.getElementById('modal-type').value.trim() || 'visit';
+            const newMap = document.getElementById('modal-map').value.trim();
+            const newHighlight = document.getElementById('modal-highlight').checked;
             
-            if (newTime && newDesc && !isNaN(dayIndex) && !isNaN(itemIndex)) {
-                // 更新 tripInfo
-                const itemToUpdate = tripInfo.days[dayIndex].items[itemIndex];
-                itemToUpdate.time = newTime;
-                itemToUpdate.desc = newDesc;
+            if (!newTime || !newDesc || isNaN(dayIndex)) {
+                alert("時間、內容和日期不能為空！");
+                return;
+            }
 
-                // 儲存並重新渲染
-                saveToLS('tripInfo', tripInfo);
-                closeEditModal();
-                renderPage();
+            const newItemData = {
+                time: newTime,
+                type: newType,
+                desc: newDesc,
+                map: newMap,
+                highlight: newHighlight
+            };
+
+            if (mode === 'edit' && !isNaN(itemIndex) && itemIndex >= 0) {
+                // ** 編輯模式 **
+                Object.assign(tripInfo.days[dayIndex].items[itemIndex], newItemData);
+                
+            } else if (mode === 'add') {
+                // ** 新增模式 **
+                tripInfo.days[dayIndex].items.push(newItemData);
+                
             } else {
-                alert("時間或內容不能為空！");
+                alert("儲存失敗：無效的操作模式或索引。");
+                return;
+            }
+
+            // 儲存並重新渲染
+            saveToLS('tripInfo', tripInfo);
+            closeEditItemModal();
+            renderPage();
+        }
+
+        /**
+         * 刪除當前 Modal 中的行程項目
+         */
+        window.deleteItem = function() {
+            const dayIndex = parseInt(document.getElementById('modal-day-index').value);
+            const itemIndex = parseInt(document.getElementById('modal-item-index').value);
+
+            if (confirm("確定要刪除這筆行程嗎？此操作不可逆！")) {
+                if (!isNaN(dayIndex) && !isNaN(itemIndex) && itemIndex >= 0) {
+                    tripInfo.days[dayIndex].items.splice(itemIndex, 1);
+                    saveToLS('tripInfo', tripInfo);
+                    closeEditItemModal();
+                    renderPage();
+                } else {
+                    alert("刪除失敗：無法識別項目。");
+                }
             }
         }
         
+        // ====================================================================
+        // 行程日標題編輯 Modal 邏輯 (Day Title CRUD - 保持不變)
+        // ====================================================================
+
+        /**
+         * 開啟行程日標題編輯 Modal
+         * @param {number} dayIndex
+         */
+        window.openEditDayModal = function(dayIndex) {
+            const day = tripInfo.days[dayIndex];
+            
+            // 載入資料
+            document.getElementById('day-modal-index').value = dayIndex;
+            document.getElementById('day-modal-date').value = day.date || '';
+            document.getElementById('day-modal-title').value = day.title || '';
+            
+            document.getElementById('edit-day-modal').style.display = 'block';
+        }
+
+        window.closeEditDayModal = function() {
+            document.getElementById('edit-day-modal').style.display = 'none';
+        }
+
+        window.saveEditedDay = function() {
+            const dayIndex = parseInt(document.getElementById('day-modal-index').value);
+            
+            const newDate = document.getElementById('day-modal-date').value.trim();
+            const newTitle = document.getElementById('day-modal-title').value.trim();
+            
+            if (!newDate || !newTitle || isNaN(dayIndex)) {
+                alert("日期描述和行程標題不能為空！");
+                return;
+            }
+
+            // 更新數據
+            tripInfo.days[dayIndex].date = newDate;
+            tripInfo.days[dayIndex].title = newTitle;
+
+            // 儲存並重新渲染
+            saveToLS('tripInfo', tripInfo);
+            closeEditDayModal();
+            renderPage();
+        }
+
         // 點擊 Modal 外部關閉
         window.onclick = function(event) {
-            const modal = document.getElementById('edit-item-modal');
-            if (event.target == modal) {
-                closeEditModal();
+            const itemModal = document.getElementById('edit-item-modal');
+            const dayModal = document.getElementById('edit-day-modal');
+            const resetModal = document.getElementById('reset-confirm-modal');
+
+            if (event.target == itemModal) {
+                closeEditItemModal();
+            } else if (event.target == dayModal) {
+                closeEditDayModal();
+            } else if (event.target == resetModal) {
+                closeResetConfirmModal();
             }
         }
 
 
         // ====================================================================
-        // GUIDE 頁面
+        // GUIDE 頁面 (天氣/交通) (略)
         // ====================================================================
 
-        function renderGuidePage() {
-            const guideContent = tripInfo.guide;
+        function renderTransportPage() {
+            const guideContent = tripInfo.transportGuide;
+
+            // **模擬**即時天氣資料 (此處保持不變)
+            const currentWeather = {
+                location: "大阪市",
+                date: "12月15日",
+                temperature: "8°C ~ 14°C",
+                condition: "多雲時晴",
+                icon: "fas fa-cloud-sun"
+            };
+
+            const weatherHtml = `
+                <div class="muji-card p-5 mb-6 bg-var(--color-accent)/20 border-var(--color-accent)">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center">
+                        <i class="fas fa-umbrella mr-3 text-2xl text-var(--color-primary)"></i> ${currentWeather.location} 即時天氣
+                    </h3>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-4xl font-light text-gray-900">${currentWeather.temperature}</p>
+                            <p class="text-sm text-gray-600">${currentWeather.date} / ${currentWeather.condition}</p>
+                        </div>
+                        <i class="${currentWeather.icon} text-6xl text-amber-500"></i>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 border-t pt-2">
+                        *此為模擬數據，實際使用請查詢專業天氣 App。
+                    </p>
+                </div>
+            `;
+
+            // --- 行程交通摘要區塊 (應為空) ---
+            const extractedTransport = [];
+            const transportSummaryHtml = `
+                <h3 class="text-xl font-bold text-gray-800 mb-4 mt-6">📝 行程交通摘要 (您的排程)</h3>
+                ${extractedTransport.length > 0 ? extractedTransport : '<p class="p-4 text-center text-gray-500">行程中沒有明確標註的交通轉乘或建議。</p>'}
+            `;
+            // ------------------------------------
 
             const guideHtml = guideContent.map(item => `
                 <div class="muji-card p-5 mb-5">
                     <h3 class="text-xl font-bold text-var(--color-primary) mb-3 flex items-center">
                         <i class="${item.icon} mr-3 text-2xl"></i>${item.title}
                     </h3>
-                    <p class="text-gray-700 whitespace-pre-wrap leading-loose text-justify">${item.text}</p>
+                    <p class="text-gray-700 whitespace-pre-wrap leading-relaxed text-justify">${item.text}</p>
+                    ${item.tip ? `<blockquote class="mt-3 p-3 text-sm italic border-l-4 border-var(--color-accent) bg-gray-50">貼心提醒: ${item.tip}</blockquote>` : ''}
                 </div>
             `).join('');
 
             return `
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">📖 深度導覽 (GUIDE)</h2>
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">🌤️ 天氣與交通 (WEATHER & TRANSPORT)</h2>
                 
-                <p class="text-sm text-gray-600 mb-4">目前的導覽內容仍須透過「資訊」分頁進行進階編輯。</p>
+                ${weatherHtml}
 
+                ${transportSummaryHtml}
+                
+                <h3 class="text-xl font-bold text-gray-800 mb-4 mt-6">🚄 核心交通指南 (通用資訊)</h3>
                 ${guideHtml}
-
-                <h3 class="text-xl font-bold text-gray-800 mb-4 mt-8">🗺️ 地理位置概覽 (大阪市)</h3>
+                
+                <h3 class="text-xl font-bold text-gray-800 mb-4 mt-8">🗺️ 大阪交通地圖概覽</h3>
                 <div class="muji-card p-2 h-80 overflow-hidden">
-                    <!-- 使用 OpenStreetMap iframe -->
                     <iframe 
                         width="100%" 
                         height="100%" 
@@ -654,19 +965,125 @@
                 <p class="text-xs text-gray-500 mt-2 text-center">地圖中心約為大阪難波/心齋橋區域</p>
             `;
         }
+        
+        // ====================================================================
+        // 新增的通用函數：切換頁面並滾動到指定元素
+        // ====================================================================
+        window.changePageAndScroll = function(page, elementId) {
+            currentPage = page;
+            renderPage();
+            
+            // 使用 setTimeout 確保 DOM 渲染完成後再滾動
+            setTimeout(() => {
+                const targetElement = document.getElementById(elementId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 50); 
+        }
 
         // ====================================================================
-        // WALLET 頁面 (記帳與匯率) - 保持不變
+        // WALLET 頁面 (略)
         // ====================================================================
+
+        function calculateTWD(jpy) {
+            return Math.round(jpy * exchangeRate);
+        }
+
+        function addBudgetEntry() {
+            const item = document.getElementById('item-input').value.trim();
+            const jpyExpression = document.getElementById('jpy-input').value.trim();
+            const fileInput = document.getElementById('receipt-image');
+            
+            if (!item || !jpyExpression) {
+                alert("請輸入項目名稱和日幣金額/算式！");
+                return;
+            }
+
+            // 嘗試計算 JPY 金額
+            let jpy = 0;
+            try {
+                // 使用 Function 構造函數來安全執行算式，避免使用 eval
+                jpy = new Function('return ' + jpyExpression)();
+                if (typeof jpy !== 'number' || isNaN(jpy)) {
+                    throw new Error("Invalid calculation result");
+                }
+                jpy = Math.round(jpy);
+            } catch (e) {
+                alert("日幣算式無效，請檢查輸入！");
+                return;
+            }
+
+            const twd = calculateTWD(jpy);
+
+            const entry = {
+                item: item,
+                jpy: jpy,
+                twd: twd,
+                image: null // 圖片 Base64 字串
+            };
+
+            // 處理圖片上傳
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    // 壓縮圖片
+                    entry.image = await compressImage(e.target.result);
+                    
+                    budgetEntries.unshift(entry);
+                    saveToLS('budgetEntries', budgetEntries);
+                    renderPage();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                budgetEntries.unshift(entry);
+                saveToLS('budgetEntries', budgetEntries);
+                renderPage();
+            }
+        }
+
+        window.updateExchangeRate = function(newRate) {
+            const input = document.getElementById('exchange-rate-input');
+            let rate = parseFloat(newRate || input.value);
+            
+            if (isNaN(rate) || rate <= 0) {
+                alert("請輸入有效的匯率！");
+                input.value = exchangeRate; // 還原舊值
+                return;
+            }
+
+            exchangeRate = rate;
+            saveToLS('exchangeRate', exchangeRate);
+            
+            // 重新計算所有 TWD 總額
+            budgetEntries.forEach(entry => {
+                entry.twd = calculateTWD(entry.jpy);
+            });
+
+            saveToLS('budgetEntries', budgetEntries);
+            renderPage();
+        }
+
+        window.deleteBudgetEntry = function(index) {
+            if (confirm("確定要刪除這筆記帳嗎？")) {
+                budgetEntries.splice(index, 1);
+                saveToLS('budgetEntries', budgetEntries);
+                renderPage();
+            }
+        }
+
+        function bindWalletEvents() {
+            // 綁定計算按鈕
+            document.getElementById('calculate-btn').onclick = addBudgetEntry;
+        }
 
         function renderWalletPage() {
             let entriesHtml = budgetEntries.map((entry, index) => `
                 <div class="flex items-center p-3 border-b border-gray-100 last:border-b-0">
-                    <!-- 縮圖 -->
                     <div class="w-12 h-12 flex-shrink-0 mr-3 overflow-hidden rounded-md bg-gray-100">
                         ${entry.image ? `<img src="${entry.image}" alt="收據" class="w-full h-full object-cover">` : `<i class="fas fa-camera text-gray-400 text-lg flex items-center justify-center w-full h-full"></i>`}
                     </div>
-                    <!-- 品項與金額 -->
                     <div class="flex-grow min-w-0">
                         <p class="font-medium text-gray-800 truncate">${entry.item}</p>
                         <p class="text-sm text-gray-600">
@@ -675,7 +1092,6 @@
                             ${formatCurrency(entry.twd, 'TWD')}
                         </p>
                     </div>
-                    <!-- 刪除按鈕 -->
                     <button onclick="deleteBudgetEntry(${index})" class="text-red-400 hover:text-red-600 text-lg p-1 ml-2">
                         <i class="fas fa-trash-alt"></i>
                     </button>
@@ -688,7 +1104,6 @@
             return `
                 <h2 class="text-2xl font-bold text-gray-800 mb-6">💰 記帳與匯率 (WALLET)</h2>
 
-                <!-- 匯率換算器 -->
                 <div class="muji-card p-5 mb-6">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-100 pb-1">即時匯率換算 (1 JPY = <span id="current-rate">${exchangeRate}</span> TWD)</h3>
                     
@@ -699,420 +1114,292 @@
                             onchange="updateExchangeRate(this.value)">
                         <button onclick="updateExchangeRate()" class="muji-btn px-4 text-sm rounded-l-none">更新</button>
                     </div>
-
-                    <div class="space-y-3">
-                        <label for="jpy-input" class="block text-sm font-medium text-gray-700">日幣算式 (e.g. 500+200*3)</label>
-                        <input type="text" id="jpy-input" placeholder="請輸入日幣算式或金額"
-                            class="w-full p-3 border border-gray-300 rounded-lg text-2xl font-mono text-right focus:ring-var(--color-primary) focus:border-var(--color-primary)">
-                        
-                        <button id="calculate-btn" class="muji-btn w-full py-3 text-lg font-bold mt-2">計算並換算 (TWD)</button>
-                        
-                        <div class="text-center p-3 mt-4 bg-var(--color-accent) rounded-lg bg-opacity-30">
-                            <p class="text-sm text-gray-700">日幣總額 (JPY)：<span id="result-jpy" class="text-xl font-bold text-gray-800">0</span></p>
-                            <p class="text-sm text-gray-700 mt-1">台幣換算 (TWD)：<span id="result-twd" class="text-xl font-bold text-red-600">0</span></p>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- 記帳輸入 -->
                 <div class="muji-card p-5 mb-6">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-100 pb-1">新增一筆支出</h3>
-                    
-                    <input type="text" id="budget-item" placeholder="品項名稱 (e.g. 午餐, 紀念品)"
-                        class="w-full p-2 border border-gray-300 rounded-lg mb-3 focus:ring-var(--color-primary) focus:border-var(--color-primary)">
-                    
-                    <input type="number" id="budget-amount" placeholder="日幣金額 (JPY)"
-                        class="w-full p-2 border border-gray-300 rounded-lg mb-3 focus:ring-var(--color-primary) focus:border-var(--color-primary)">
-                    
-                    <div class="flex space-x-3 mb-3">
-                        <input type="file" id="receipt-photo" accept="image/*" capture="camera" class="hidden-file-input">
-                        <label for="receipt-photo" class="muji-btn flex-grow py-2 text-center text-sm cursor-pointer hover:bg-opacity-90">
-                            <i class="fas fa-camera mr-2"></i>拍照 / 上傳收據
+                    <div class="space-y-3">
+                        <label for="item-input" class="block text-sm font-medium text-gray-700">品項名稱</label>
+                        <input type="text" id="item-input" placeholder="例如：晚餐-一蘭拉麵"
+                            class="w-full p-2 border border-gray-300 rounded-lg focus:ring-var(--color-primary) focus:border-var(--color-primary)">
+
+                        <label for="jpy-input" class="block text-sm font-medium text-gray-700">日幣金額/算式 (e.g. 500+200*3)</label>
+                        <input type="text" id="jpy-input" placeholder="請輸入日幣金額或算式"
+                            class="w-full p-2 border border-gray-300 rounded-lg focus:ring-var(--color-primary) focus:border-var(--color-primary)">
+                        
+                        <label for="receipt-image-label" class="block text-sm font-medium text-gray-700">收據照片 (選填)</label>
+                        <label for="receipt-image" id="receipt-image-label" class="muji-btn flex items-center justify-center p-2 cursor-pointer text-sm">
+                            <i class="fas fa-camera mr-2"></i> 上傳收據縮圖 (將自動壓縮)
                         </label>
-                        <button id="add-budget-btn" class="muji-btn flex-grow py-2 text-sm">
-                            <i class="fas fa-plus mr-2"></i>新增記帳
-                        </button>
+                        <input type="file" id="receipt-image" accept="image/*" class="hidden-file-input">
                     </div>
-                </div>
-
-                <!-- 記帳歷史 -->
-                <div class="muji-card p-5">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-100 pb-1 flex justify-between items-center">
-                        記帳歷史 (共 ${budgetEntries.length} 筆)
-                        <span class="text-xs text-red-600 font-bold">總計: ${formatCurrency(totalTWD, 'TWD')}</span>
-                    </h3>
-                    <div id="budget-list" class="divide-y divide-gray-100">
-                        ${entriesHtml || '<p class="text-center text-gray-500 py-4">尚無支出記錄</p>'}
-                    </div>
-                </div>
-            `;
-        }
-
-        function bindWalletEvents() {
-            document.getElementById('calculate-btn').addEventListener('click', () => {
-                const input = document.getElementById('jpy-input').value.trim();
-                let jpyAmount = 0;
-                let twdAmount = 0;
-                
-                if (input) {
-                    try {
-                        // 使用 eval 進行算式計算 (此處用於簡單計算，安全性可控)
-                        jpyAmount = parseFloat(eval(input).toFixed(2));
-                        twdAmount = parseFloat((jpyAmount * exchangeRate).toFixed(0));
-                    } catch (e) {
-                        jpyAmount = 0;
-                        twdAmount = 0;
-                        console.error("計算錯誤:", e);
-                    }
-                }
-                
-                document.getElementById('result-jpy').textContent = formatCurrency(jpyAmount, 'JPY').replace('¥', '');
-                document.getElementById('result-twd').textContent = formatCurrency(twdAmount, 'TWD').replace('NT$', '');
-            });
-
-            document.getElementById('receipt-photo').addEventListener('change', async (event) => {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const compressedBase64 = await compressImage(e.target.result);
-                    document.getElementById('receipt-photo').dataset.base64 = compressedBase64;
                     
-                    document.querySelector('label[for="receipt-photo"]').innerHTML = `<i class="fas fa-check mr-2"></i>收據已準備`;
-                };
-                reader.readAsDataURL(file);
-            });
-
-            document.getElementById('add-budget-btn').addEventListener('click', () => {
-                const item = document.getElementById('budget-item').value.trim();
-                const amount = parseFloat(document.getElementById('budget-amount').value);
-                const base64Image = document.getElementById('receipt-photo').dataset.base64 || '';
-                
-                if (!item || isNaN(amount) || amount <= 0) {
-                    document.getElementById('budget-item').classList.add('border-red-500');
-                    document.getElementById('budget-amount').classList.add('border-red-500');
-                    setTimeout(() => {
-                        document.getElementById('budget-item').classList.remove('border-red-500');
-                        document.getElementById('budget-amount').classList.remove('border-red-500');
-                    }, 1000);
-                    return;
-                }
-                
-                const twd = parseFloat((amount * exchangeRate).toFixed(0));
-                
-                const newEntry = {
-                    id: Date.now(),
-                    item: item,
-                    jpy: amount,
-                    twd: twd,
-                    image: base64Image,
-                    date: new Date().toISOString()
-                };
-                
-                budgetEntries.unshift(newEntry); // 新的在前面
-                saveToLS('budgetEntries', budgetEntries);
-                
-                // 重置表單
-                document.getElementById('budget-item').value = '';
-                document.getElementById('budget-amount').value = '';
-                document.getElementById('receipt-photo').dataset.base64 = '';
-                document.querySelector('label[for="receipt-photo"]').innerHTML = `<i class="fas fa-camera mr-2"></i>拍照 / 上傳收據`;
-                
-                renderPage();
-            });
-        }
-
-        window.updateExchangeRate = function(rateValue) {
-            let newRate = parseFloat(rateValue || document.getElementById('exchange-rate-input').value);
-            if (isNaN(newRate) || newRate <= 0) {
-                newRate = DEFAULT_EXCHANGE_RATE;
-                document.getElementById('exchange-rate-input').value = newRate;
-            }
-            exchangeRate = newRate;
-            saveToLS('exchangeRate', exchangeRate);
-            document.getElementById('current-rate').textContent = exchangeRate;
-            
-            budgetEntries.forEach(entry => {
-                entry.twd = parseFloat((entry.jpy * exchangeRate).toFixed(0));
-            });
-            saveToLS('budgetEntries', budgetEntries);
-            
-            renderPage();
-        }
-
-        window.deleteBudgetEntry = function(index) {
-            // 確認刪除
-            if (!confirm("您確定要刪除這筆支出記錄嗎？")) return;
-
-            budgetEntries.splice(index, 1);
-            saveToLS('budgetEntries', budgetEntries);
-            renderPage();
-        }
-
-        // ====================================================================
-        // LISTS 頁面 - 保持不變
-        // ====================================================================
-
-        function renderChecklist() {
-            const categories = checklistItems.reduce((acc, item) => {
-                const key = item.category || '未分類';
-                if (!acc[key]) acc[key] = [];
-                acc[key].push(item);
-                return acc;
-            }, {});
-
-            let html = '';
-            for (const category in categories) {
-                html += `
-                    <h4 class="text-base font-semibold text-gray-700 mt-4 mb-2">${category}</h4>
-                    <ul class="space-y-2">
-                        ${categories[category].map(item => `
-                            <li class="flex items-center">
-                                <input type="checkbox" id="check-${item.id}" data-id="${item.id}"
-                                    class="h-5 w-5 text-var(--color-primary) border-gray-300 rounded focus:ring-var(--color-primary)"
-                                    ${item.checked ? 'checked' : ''} onchange="toggleChecklistItem(${item.id})">
-                                <label for="check-${item.id}" class="ml-3 text-base text-gray-700 ${item.checked ? 'line-through text-gray-500' : ''}">
-                                    ${item.text}
-                                </label>
-                            </li>
-                        `).join('')}
-                    </ul>
-                `;
-            }
-            return html;
-        }
-
-        function renderMemo() {
-            const urlRegex = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-            const linkifiedText = memoContent.replace(urlRegex, (url) => {
-                return `<a href="${url}" target="_blank" class="muji-btn px-3 py-1 text-xs mt-1 inline-flex items-center"><i class="fas fa-external-link-alt mr-1"></i> ${url.length > 30 ? url.substring(0, 30) + '...' : url}</a>`;
-            });
-            
-            return `
-                <div class="muji-card p-4">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-100 pb-1">個人備忘錄 (可輸入連結)</h3>
-                    <textarea id="memo-textarea" 
-                        class="w-full p-2 border border-gray-300 rounded-lg h-32 text-gray-700 focus:ring-var(--color-primary) focus:border-var(--color-primary) resize-none"
-                        oninput="saveMemoContent(this.value)"
-                    >${memoContent}</textarea>
-                    
-                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-                        <p class="text-sm font-semibold text-gray-700 mb-2">連結預覽區：</p>
-                        <div id="memo-preview" class="space-y-2">
-                            ${linkifiedText}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-
-        function renderListsPage() {
-            return `
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">📝 清單與備忘 (LISTS)</h2>
-
-                <!-- 行前準備 Checklist -->
-                <div class="muji-card p-5 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-100 pb-1">行前準備 CheckList</h3>
-                    <div id="checklist-container">
-                        ${renderChecklist()}
-                    </div>
+                    <button id="calculate-btn" class="muji-btn w-full mt-4 py-2 font-semibold">記錄支出</button>
                 </div>
 
-                <!-- 個人備忘錄 -->
-                ${renderMemo()}
-            `;
-        }
 
-        function bindListsEvents() {
-            // Memo textarea input is handled by saveMemoContent in its oninput attribute
+                <h3 class="text-xl font-bold text-gray-800 mb-4 mt-6">📊 支出總計與明細</h3>
+                <div class="muji-card p-5 mb-6 bg-var(--color-accent)/20">
+                    <p class="text-lg font-bold text-gray-800 flex justify-between mb-1">
+                        <span>日圓總計 (JPY):</span>
+                        <span class="text-red-600">${formatCurrency(totalJPY, 'JPY')}</span>
+                    </p>
+                    <p class="text-lg font-bold text-gray-800 flex justify-between">
+                        <span>台幣總計 (TWD):</span>
+                        <span class="text-blue-600">${formatCurrency(totalTWD, 'TWD')}</span>
+                    </p>
+                </div>
+
+                <div class="muji-card">
+                    ${entriesHtml || '<p class="p-4 text-center text-gray-500">目前還沒有記帳紀錄。</p>'}
+                </div>
+            `;
         }
         
+        // ====================================================================
+        // LISTS 頁面 (略)
+        // ====================================================================
+
+        function saveChecklist() {
+            saveToLS('checklistItems', checklistItems);
+        }
+
+        function renderListsPage() {
+            const categories = [...new Set(checklistItems.map(item => item.category))];
+            
+            let checklistHtml = categories.map(category => {
+                const items = checklistItems.filter(item => item.category === category);
+                const listItemsHtml = items.map(item => `
+                    <li class="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0 group">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="item-${item.id}" onchange="toggleChecklistItem(${item.id})" ${item.checked ? 'checked' : ''}
+                                class="h-4 w-4 text-var(--color-primary) border-gray-300 rounded focus:ring-var(--color-primary) checked:bg-var(--color-primary)">
+                            <label for="item-${item.id}" class="ml-3 text-base text-gray-800 ${item.checked ? 'line-through text-gray-400' : ''}">${item.text}</label>
+                        </div>
+                        <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="editChecklistItem(${item.id})" class="text-gray-400 hover:text-blue-600">
+                                <i class="fas fa-pencil-alt text-sm"></i>
+                            </button>
+                            <button onclick="deleteChecklistItem(${item.id})" class="text-gray-400 hover:text-red-600">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
+                        </div>
+                    </li>
+                `).join('');
+
+                return `
+                    <div class="muji-card p-5 mb-5">
+                        <h3 class="text-lg font-bold text-var(--color-primary) mb-3 border-b border-gray-100 pb-1">${category}</h3>
+                        <ul class="divide-y divide-gray-50 -mx-3">
+                            ${listItemsHtml}
+                        </ul>
+                    </div>
+                `;
+            }).join('');
+            
+            return `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">🎒 行前清單 (LISTS)</h2>
+                
+                <div class="muji-card p-5 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-100 pb-1">新增打包項目</h3>
+                    <div class="flex space-x-2 mb-3">
+                        <input type="text" id="new-item-text" placeholder="項目名稱" class="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-var(--color-primary) focus:border-var(--color-primary)">
+                        <input type="text" id="new-item-category" placeholder="分類 (e.g. 衣物/購物清單)" class="w-28 p-2 border border-gray-300 rounded-lg focus:ring-var(--color-primary) focus:border-var(--color-primary)">
+                    </div>
+                    <button onclick="addChecklistItem()" class="muji-btn w-full py-2 font-semibold">新增到清單</button>
+                </div>
+
+                ${checklistHtml}
+            `;
+        }
+
         window.toggleChecklistItem = function(id) {
             const item = checklistItems.find(i => i.id === id);
             if (item) {
                 item.checked = !item.checked;
-                saveToLS('checklistItems', checklistItems);
-                document.getElementById('checklist-container').innerHTML = renderChecklist();
+                saveChecklist();
+                renderPage();
             }
         }
 
-        window.saveMemoContent = function(text) {
-            memoContent = text;
-            saveToLS('memoContent', memoContent);
-            
-            const urlRegex = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-            const linkifiedText = memoContent.replace(urlRegex, (url) => {
-                return `<a href="${url}" target="_blank" class="muji-btn px-3 py-1 text-xs mt-1 inline-flex items-center"><i class="fas fa-external-link-alt mr-1"></i> ${url.length > 30 ? url.substring(0, 30) + '...' : url}</a>`;
-            });
-            document.getElementById('memo-preview').innerHTML = linkifiedText;
+        window.addChecklistItem = function() {
+            const text = document.getElementById('new-item-text').value.trim();
+            const category = document.getElementById('new-item-category').value.trim() || '雜項';
+
+            if (text) {
+                const newId = checklistItems.length > 0 ? Math.max(...checklistItems.map(i => i.id)) + 1 : 1;
+                checklistItems.push({ id: newId, text: text, checked: false, category: category });
+                saveChecklist();
+                document.getElementById('new-item-text').value = '';
+                document.getElementById('new-item-category').value = '';
+                renderPage();
+            }
         }
 
-        // ====================================================================
-        // INFO 頁面 (保留進階編輯功能)
-        // ====================================================================
+        window.deleteChecklistItem = function(id) {
+            if (confirm("確定刪除此項目嗎？")) {
+                checklistItems = checklistItems.filter(i => i.id !== id);
+                saveChecklist();
+                renderPage();
+            }
+        }
 
-        function saveTripInfo() {
-            const editor = document.getElementById('trip-info-editor');
-            const statusDiv = document.getElementById('editor-status');
-            
-            try {
-                const newTripInfo = JSON.parse(editor.value);
-                // 執行基本結構檢查 (可選, 簡化處理: 確保它是個物件且有 days 陣列)
-                if (typeof newTripInfo !== 'object' || !Array.isArray(newTripInfo.days)) {
-                    throw new Error("JSON 格式不符預期，請確保 days 是一個陣列。");
+        window.editChecklistItem = function(id) {
+            const item = checklistItems.find(i => i.id === id);
+            if (item) {
+                const newText = prompt("編輯項目內容：", item.text);
+                if (newText !== null && newText.trim() !== '') {
+                    item.text = newText.trim();
+                    const newCategory = prompt("編輯項目分類 (e.g. 衣物)：", item.category);
+                    if (newCategory !== null) {
+                        item.category = newCategory.trim() || '雜項';
+                    }
+                    saveChecklist();
+                    renderPage();
                 }
-                
-                tripInfo = newTripInfo;
-                saveToLS('tripInfo', tripInfo);
-                
-                statusDiv.textContent = '✅ 行程資料已成功儲存！請切換至 PLAN 或 GUIDE 頁面查看更新。';
-                statusDiv.classList.remove('text-red-500', 'text-orange-500');
-                statusDiv.classList.add('text-green-600');
-                
-            } catch (error) {
-                statusDiv.textContent = `❌ 儲存失敗！JSON 格式錯誤: ${error.message}`;
-                statusDiv.classList.remove('text-green-600', 'text-orange-500');
-                statusDiv.classList.add('text-red-500');
             }
         }
 
-        function resetTripInfo() {
-            // 使用自定義 alert 替代，因為 canvas 環境不支援原生 confirm
-            const confirmed = window.confirm("您確定要將行程資料重置為初始版本嗎？這將覆蓋所有修改。");
-            
-            if (confirmed) {
-                tripInfo = initialTripInfo;
-                saveToLS('tripInfo', tripInfo);
-                document.getElementById('trip-info-editor').value = JSON.stringify(tripInfo, null, 2);
-                document.getElementById('editor-status').textContent = '⚠️ 行程資料已重置為預設版本！';
-                document.getElementById('editor-status').classList.remove('text-green-600', 'text-red-500');
-                document.getElementById('editor-status').classList.add('text-orange-500');
-                renderPage(); // 重新渲染頁面以確保變動生效
-            }
+        function bindListsEvents() {
+            // Nothing to bind beyond inline handlers for now
         }
-        
-        function renderInfoPage() {
-            const emergencyInfo = [
-                { title: "警察報案 (Police)", number: "110", icon: "user-secret" },
-                { title: "救護車/火警 (Ambulance/Fire)", number: "119", icon: "fire-extinguisher" },
-                { title: "中華民國駐日辦事處 (大阪)", number: "+81-6-6120-6650", icon: "building-columns" },
-                { title: "當地天氣預報 (日本氣象廳)", link: "https://www.jma.go.jp/jma/index.html", icon: "cloud-sun" },
-            ];
 
-            const prohibitions = [
-                { text: "攜帶超量或未申報之煙酒、藥品。", icon: "ban" },
-                { text: "未經許可攜帶肉製品、水果等動植物檢疫物入境。", icon: "box-archive" },
-                { text: "公共場所吸菸 (請至指定吸菸區)。", icon: "smoking" },
-                { text: "在自動扶梯上靠左/右站立 (大阪靠右，東京靠左，但請注意當地指示)。", icon: "person-walking" },
-                { text: "邊走邊吃 (多數日本人習慣站著吃或找地方坐下)。", icon: "utensils" },
-            ];
+        // ====================================================================
+        // INFO 頁面 (資訊/重設 & 美食清單)
+        // ====================================================================
 
-            let emergencyHtml = emergencyInfo.map(item => `
-                <div class="flex items-center p-3 border-b border-gray-100 last:border-b-0">
-                    <i class="fas fa-${item.icon} text-xl text-var(--color-primary) mr-3 flex-shrink-0"></i>
-                    <div class="flex-grow">
-                        <p class="font-medium text-gray-800">${item.title}</p>
-                        ${item.number ? `<p class="text-red-600 text-sm font-mono">${item.number}</p>` : ''}
-                    </div>
-                    ${item.link ? `<a href="${item.link}" target="_blank" class="muji-btn px-3 py-1 text-xs">前往</a>` : ''}
-                </div>
-            `).join('');
+        function saveMemo() {
+            memoContent = document.getElementById('memo-content').value;
+            saveToLS('memoContent', memoContent);
+        }
 
-            let prohibitionHtml = prohibitions.map(item => `
-                <li class="flex items-start text-gray-700">
-                    <i class="fas fa-${item.icon} text-red-500 mr-3 mt-1 flex-shrink-0"></i>
-                    ${item.text}
-                </li>
-            `).join('');
+        /**
+         * 呼叫 Modal 進行二次確認 (防呆)
+         */
+        window.openResetConfirmModal = function() {
+            document.getElementById('reset-confirm-modal').style.display = 'block';
+        }
 
+        window.closeResetConfirmModal = function() {
+            document.getElementById('reset-confirm-modal').style.display = 'none';
+        }
 
-            return `
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">💡 旅遊資訊與設定 (INFO)</h2>
-
-                <!-- 行程資料編輯區 (進階) -->
-                <div class="muji-card p-5 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-100 pb-1 flex justify-between items-center">
-                        <i class="fas fa-code mr-2"></i>進階編輯 (PLAN/GUIDE JSON 資料)
-                    </h3>
-                    <p class="text-sm text-red-500 mb-3">⚠️ 僅限進階使用者：請以 JSON 格式編輯，格式錯誤將無法儲存。</p>
-                    
-                    <textarea id="trip-info-editor" 
-                        class="w-full p-2 border border-gray-300 rounded-lg h-80 text-gray-700 focus:ring-var(--color-primary) focus:border-var(--color-primary) resize-y"
-                    ></textarea>
-                    
-                    <div class="flex space-x-3 mt-3">
-                        <button id="save-trip-btn" class="muji-btn flex-grow py-2 text-sm">
-                            <i class="fas fa-save mr-2"></i>儲存變更
-                        </button>
-                        <button id="reset-trip-btn" class="bg-gray-400 text-white hover:bg-gray-500 rounded-lg py-2 px-4 text-sm">
-                            <i class="fas fa-undo mr-2"></i>重置
-                        </button>
-                    </div>
-                    <p id="editor-status" class="text-sm mt-3 text-gray-500"></p>
-                </div>
-
-
-                <!-- 緊急資訊 -->
-                <div class="muji-card p-5 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-100 pb-1">緊急聯絡資訊</h3>
-                    <div class="divide-y divide-gray-100">
-                        ${emergencyHtml}
-                    </div>
-                </div>
-
-                <!-- 旅遊禁忌與注意事項 -->
-                <div class="muji-card p-5">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-100 pb-1">旅遊禁忌與注意事項</h3>
-                    <ul class="space-y-3 list-none pl-0">
-                        ${prohibitionHtml}
-                    </ul>
-                </div>
-            `;
+        /**
+         * 執行資料清除
+         */
+        window.executeReset = function() {
+            localStorage.clear();
+            alert("所有本地資料已清除。頁面將重新載入。");
+            closeResetConfirmModal(); // 關閉 Modal
+            window.location.reload();
         }
 
         function bindInfoEvents() {
-            const editor = document.getElementById('trip-info-editor');
-            // 載入當前儲存的 JSON 資料，並格式化顯示
-            editor.value = JSON.stringify(tripInfo, null, 2);
-            
-            document.getElementById('save-trip-btn').addEventListener('click', saveTripInfo);
-            document.getElementById('reset-trip-btn').addEventListener('click', resetTripInfo);
-
-            // 替代 window.confirm/alert
-            window.confirm = (message) => {
-                return prompt(message + "\n\n(請輸入 '確認' 繼續)");
+            // 確保元素存在後再綁定事件
+            const memoTextarea = document.getElementById('memo-content');
+            if (memoTextarea) {
+                memoTextarea.onchange = saveMemo;
+                memoTextarea.onkeyup = saveMemo;
             }
-
-            // 將兩個函式掛載到 window，以便 HTML 內連事件使用 (雖然這裡已改用 ID 綁定)
-            window.saveTripInfo = saveTripInfo;
-            window.resetTripInfo = resetTripInfo;
         }
 
+        /**
+         * 渲染美食推薦清單
+         */
+        function renderFoodRecommendations() {
+            const foodList = tripInfo.foodRecommendations;
+            if (!foodList || foodList.length === 0) return '';
 
+            let html = '<h3 class="text-2xl font-bold text-gray-800 mb-6 mt-8">🍜 推薦美食清單 (Food Recommendations)</h3>';
+
+            // 將項目按城市分組
+            const groupedByCity = foodList.reduce((acc, current) => {
+                (acc[current.city] = acc[current.city] || []).push(current);
+                return acc;
+            }, {});
+
+            for (const city in groupedByCity) {
+                html += `
+                    <div class="muji-card p-5 mb-5">
+                        <h4 class="text-xl font-bold text-var(--color-primary) mb-3 border-b border-gray-100 pb-1">${city} 美食推薦</h4>
+                `;
+                groupedByCity[city].forEach(areaGroup => {
+                    html += `
+                        <div class="mb-3">
+                            <p class="text-lg font-semibold text-gray-700 mt-2 mb-1">${areaGroup.area}</p>
+                            <ul class="list-disc list-inside ml-2 text-gray-700 text-sm space-y-1">
+                                ${areaGroup.items.map(item => {
+                                    // ** 新增 Google Maps 連結 **
+                                    const query = `日本 ${areaGroup.city} ${areaGroup.area} ${item}`;
+                                    const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+                                    
+                                    return `<li>
+                                                <i class="fas fa-utensils text-gray-400 mr-1"></i> 
+                                                <a href="${mapLink}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium underline">${item}</a>
+                                            </li>`;
+                                }).join('')}
+                            </ul>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            return html;
+        }
+
+        function renderInfoPage() {
+            return `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">ℹ️ 應用程式資訊 (INFO)</h2>
+                
+                <div class="muji-card p-5 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-100 pb-1">個人備忘錄 (Memo)</h3>
+                    <textarea id="memo-content" rows="8" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-var(--color-primary) focus:border-var(--color-primary) resize-none">${memoContent}</textarea>
+                    <p class="text-xs text-gray-500 mt-2">此處內容會自動儲存。</p>
+                </div>
+                
+                ${renderFoodRecommendations()}
+
+                <div class="muji-card p-5 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-100 pb-1">關於本指南</h3>
+                    <p class="text-sm text-gray-700">版本：1.0 (極簡無印風旅行 App)</p>
+                    <p class="text-sm text-gray-700">設計目標：輕量化、視覺化、高互動性的單頁式旅遊行程管理。</p>
+                    <p class="xs text-gray-500 mt-3">當前使用者 ID: ${userId}</p>
+                </div>
+
+                <div class="muji-card p-5 mb-6 border border-red-200 bg-red-50">
+                    <h3 class="text-lg font-bold text-red-600 mb-3 border-b border-red-200 pb-1">💣 數據管理與重設</h3>
+                    <p class="text-sm text-gray-600 mb-3">您的所有編輯（行程修改、記帳、清單等）都儲存在**瀏覽器的本地儲存**中。</p>
+                    <button onclick="openResetConfirmModal()" class="muji-btn bg-red-500 hover:bg-red-600 w-full py-2 font-semibold">
+                        <i class="fas fa-trash-alt mr-2"></i> 清除所有本地資料 (重設為初始狀態)
+                    </button>
+                    <p class="text-xs text-red-500 mt-2 text-center">**警告：此操作不可逆，將丟失所有個人化數據！**</p>
+                </div>
+            `;
+        }
+        
         // ====================================================================
-        // V. INITIALIZATION & EVENT LISTENERS
+        // V. INITIALIZATION (略)
         // ====================================================================
 
         document.addEventListener('DOMContentLoaded', () => {
-            // 顯示使用者 ID (方便 LocalStorage 隔離)
+            // 設定使用者 ID 顯示
             document.getElementById('current-user-id').textContent = `使用者 ID: ${userId}`;
             
-            // 導航列切換
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const targetPage = e.currentTarget.dataset.page;
-                    if (targetPage && targetPage !== currentPage) {
-                        currentPage = targetPage;
+            // 綁定底部導航列事件
+            document.querySelectorAll('.nav-item').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const newPage = e.currentTarget.dataset.page;
+                    if (newPage) {
+                        currentPage = newPage;
                         renderPage();
                     }
                 });
             });
 
-            // 首次渲染 'plan' 頁面
+            // 初始渲染頁面
             renderPage();
         });
+
     </script>
 </body>
 </html>
